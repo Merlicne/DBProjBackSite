@@ -59,7 +59,7 @@ app.get('/' , (req, res) => {
 
 
 app.get('/getFaculty', (req, res) => {
-    connection.query(`call getFaculty()`, function(err, results) {
+    connection.query(`call getAllFaculty()`, function(err, results) {
         res.status(200).json({
             message: 'success',
             results: results[0]
