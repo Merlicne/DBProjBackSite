@@ -17,7 +17,7 @@ const path = require('path');
     
     connection.connect(function(err) {
         if (!err) console.log("Connected!");
-        else console.log("Connection Failed!");
+        else console.log("Connection Failed");
     });
 }
 
