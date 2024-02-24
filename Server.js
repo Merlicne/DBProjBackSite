@@ -2,22 +2,25 @@ const express = require('express');
 const { get } = require('http');
 const mysql = require('mysql2');
 const path = require('path');
+const {Client} = require('pg')
 
 // Connect to MySQL Database
 {
-    var connection = mysql.createConnection({
+    var connection = new Client({
         // host: '127.0.0.1',//0.tcp.ap.ngrok.io:13717
         // port: 5555,
-        host: '0.tcp.ap.ngrok.io',
-        port: 10375,
-        user: 'server',
-        password: 'server1234',
-        database: 'dbfinalproj'
+        host: 'aws-0-ap-southeast-1.pooler.supabase.com',
+        port: 5432,
+        user: 'postgres.olictqjkgtdtndbkephu',
+        password: 'DBProjLocalDBServerPass_555',
+        database: 'postgres'
     });
+
+    
     
     connection.connect(function(err) {
         if (!err) console.log("Connected!");
-        else console.log("Connection Failed");
+        else console.log(err);
     });
 }
 
@@ -71,13 +74,14 @@ app.get('/getFaculty', (req, res) => {
     console.log(`getFaculty ${++req_count}`);
 
     // get all faculty
-    connection.query(`call getAllFaculty()`, function(err, results) {
+    connection.query(`select karaoke.getAllFaculty();`, function(err, results) {
         res.status(200).json({
             message: 'success',
-            results: results[0]
+            results: results.rows
     });
     });
 });
+
 
 
 
@@ -87,7 +91,7 @@ app.get('/getFaculty/:Fact_En', (req, res) => {
 
     
     // get faculty by acronym
-    connection.query(`call getFacultyByAcro('${fact}')`, function(err, results) {
+    connection.query(`select karaoke.getFacultyByAcro ('${fact}')`, function(err, results) {
         if(err) // there is an error
         {
             res.status(404).json({
@@ -95,9 +99,9 @@ app.get('/getFaculty/:Fact_En', (req, res) => {
                 results: err
             });
         } // successfully get data
-        else if(results[0].length != 0) res.status(200).json({
+        else if(results.length != 0) res.status(200).json({
             message: 'success',
-            results: results[0]
+            results: results.rows
         });
         else{ // not found data
             res.status(404).json({
@@ -149,5 +153,19 @@ app.get('/getRoom', (req, res) => {
             results: results[0]
     });
     });
+});
+
+app.post("/book-success", (req, res) => {
+    const reqBody = {
+        user_id : req.body.user_id,
+        room_id : req.body.room_id,
+        
+        res_duration : req.body.duration,
+        res_date_onservice : req.body.date_onservice,
+        res_time_onservice : req.body.time_onservice
+    };
+    
+    connection.query(`select updateTransaction(?, ?, ?, ?, ?)`, 
+    [reqBody.user_id, reqBody.room_id, reqBody.res_duration, reqBody.res_date_onservice, reqBody.res_time_onservice])
 });
 
