@@ -3,6 +3,7 @@ const { get } = require('http');
 const mysql = require('mysql2');
 const path = require('path');
 const {Client} = require('pg')
+const {createHash}  = require('crypto')
 
 // Connect to MySQL Database
 {
@@ -69,7 +70,7 @@ app.get('/' , (req, res) => {
     res.sendFile(path.join(__dirname,'public', 'html_lake/Docs.html'));
 });
 
-
+// done
 app.get('/getFaculty', (req, res) => {
     console.log(`getFaculty ${++req_count}`);
 
@@ -84,7 +85,7 @@ app.get('/getFaculty', (req, res) => {
 
 
 
-
+// done
 app.get('/getFaculty/:Fact_En', (req, res) => {
     let fact = req.params.Fact_En.toLowerCase();
     console.log(fact + ` ${++req_count}`);
@@ -155,17 +156,108 @@ app.get('/getRoom', (req, res) => {
     });
 });
 
-app.post("/book-success", (req, res) => {
-    const reqBody = {
-        user_id : req.body.user_id,
-        room_id : req.body.room_id,
-        
-        res_duration : req.body.duration,
-        res_date_onservice : req.body.date_onservice,
-        res_time_onservice : req.body.time_onservice
-    };
-    
-    connection.query(`select updateTransaction(?, ?, ?, ?, ?)`, 
-    [reqBody.user_id, reqBody.room_id, reqBody.res_duration, reqBody.res_date_onservice, reqBody.res_time_onservice])
+
+// done
+app.post("/book_success", express.json(), (req, res) => {
+    console.log("check?");
+    connection.query(`SELECT karaoke.insertReserve('${req.body.user_phone}'::text, ${req.body.room_id}::int2, ${req.body.duration}::int2, to_timestamp('${req.body.datetime}','YYYY-MM-DD HH24:MI')::timestamp);`
+    , function(err, results){
+        if(err) res.status(500).json({
+            error:err
+        }) 
+        else 
+        res.status(200).json({
+            message: 'success',
+            results: results.rows
+        });
+})
 });
 
+
+
+app.get('/landing_page', (req,res) => {
+    console.log(`landing_page ${++req_count}`);  
+    connection.query(`select * from karaoke.reserved('now')`, function(err, results) {
+        res.status(200).json({
+            message: 'success',
+            results: results.rows
+        });
+    });
+
+});
+
+app.get('/getAvaliable', (req,res) => {
+    console.log(`avaliable_time ${++req_count}`);  
+    connection.query(`select * from karaoke.reserv_filter_dashboard('${req.query.date}');`, function(err, results) {
+        if(err)
+        {
+            res.status(404).json({
+                message: 'fail',
+                results: err
+            });
+        }
+        else if(results.length != 0) res.status(200).json({
+            message: 'success',
+            results: results.rows
+        });
+    });
+
+});
+
+
+app.get('/getHistory', (req,res) => {
+    console.log(`get history ${++req_count}`);  
+    connection.query(`select * from karaoke.reservhistory('${req.query.phone}'::text) where status_id = 2 or status_id = 3;`, function(err, results) {
+        if(err)
+        {
+            res.status(404).json({
+                message: 'fail',
+                results: err
+            });
+        }
+        else if(results.length != 0) res.status(200).json({
+            message: 'success',
+            results: results.rows
+        });
+    });
+
+});
+
+app.get('/getRecentReserve', (req,res) => {
+    console.log(`get history ${++req_count}`);  
+    connection.query(`select * from karaoke.reservhistory('${req.query.phone}'::text) where status_id = 1;`, function(err, results) {
+        if(err)
+        {
+            res.status(404).json({
+                message: 'fail',
+                results: err
+            });
+        }
+        else if(results.length != 0) res.status(200).json({
+            message: 'success',
+            results: results.rows
+        });
+    });
+
+});
+
+
+
+
+app.post("/signup_new_customer", express.json(), (req, res) => {
+    console.log(`sign up ${++req_count}`); 
+
+    var pass = createHash('sha256').update(req.body.password).digest('base64');
+
+    connection.query(`select karaoke.UserRegister('${req.body.phone}'::text, '${req.body.email}'::text, '${pass}'::text);`
+    , function(err, results){
+        if(err) res.status(500).json({
+            error:err
+        }) 
+        else 
+        res.status(200).json({
+            message: 'success',
+            results: results.rows
+        });
+})
+});
