@@ -1,7 +1,8 @@
 const express = require('express');
 const { get } = require('http');
 const path = require('path');
-const {Client} = require('pg')
+const {Client} = require('pg');
+const { createHash } = require('crypto');
 
 // Connect to Postgres Database
 {
@@ -62,4 +63,77 @@ const {Client} = require('pg')
 //     });
 // }
 
+app.get('/' , async function (req, res, next) {
+    res.status(200).json({
+        message: 'success',
+        results: 'API work fine!'
+    });
+});
 
+app.get('/getFaculty', async function (req, res, next) {
+    var query = "select * from karaoke.getallfaculty();";
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error'});
+        else    
+            res.status(200).json({
+                message: 'success',
+                results: results.rows
+            });
+    });
+});
+
+app.post('/AdminLogin',express.json(), async function (req, res, next) {
+    var pass = createHash('sha256').update(req.body.password).digest('base64');
+
+    var query = `select karaoke.AdminLogin('${req.body.username}','${pass}');`;
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error', error: err});
+        else if (results.rows[0].login != null)    
+            res.status(200).json({  
+                message: 'success',
+                results: results.rows
+            });
+        else
+            res.status(200).json({  
+                message: 'login_fail',
+                results: results.rows
+            });
+    });
+});
+
+app.get('/Home', async function (req, res, next) {
+    var datetime = req.query.date;
+
+    if (datetime == undefined || datetime.length == 0) datetime = 'now';
+
+    var query = `select * from karaoke.reserv_filter_dashboard('${datetime}');`;
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error','error': err});
+        else    
+            res.status(200).json({
+                message: 'success',
+                results: results.rows
+            });
+    });
+});
+
+app.post('/addRoom',express.json(), async function (req, res, next) {
+    var query = `select karaoke.add_room('${req.body.room_name}');`;
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error','error': err});
+        else    
+            res.status(200).json({
+                message: 'success',
+                results: results.rows
+            });
+    });
+});
+// var pass = createHash('sha256').update('1234').digest('base64');
