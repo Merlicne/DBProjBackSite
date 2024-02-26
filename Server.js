@@ -127,23 +127,6 @@ app.get('/getStatus', (req, res) => {
 });
 
 
-// unfinish
-app.post('/CustomerRegis',express.json,(req,res,next) => {
-    // console.log(req.body);
-    // connection.query(`INSERT INTO customer (Cus_Id, Cus_Name, Cus_Email, Cus_Phone, Cus_Password) VALUES ('${req.body.Cus_Id}', '${req.body.Cus_Name}', '${req.body.Cus_Email}', '${req.body.Cus_Phone}', '${req.body.Cus_Password}')`, function(err, results) {
-    //     if(!err) res.status(200).json({
-    //         message: 'success',
-    //         results: results[0]
-    //     });
-    //     else{
-    //         res.status(404).json({
-    //             message: 'fail',
-    //             results: err
-    //         });
-    //     };
-    // });
-});
-
 app.get('/getRoom', (req, res) => {
     console.log(`getRoom ${++req_count}`);
 
@@ -159,7 +142,7 @@ app.get('/getRoom', (req, res) => {
 
 // done
 app.post("/book_success", express.json(), (req, res) => {
-    console.log("check?");
+    console.log("book_success ${++req_count}");
     connection.query(`SELECT karaoke.insertReserve('${req.body.user_phone}'::text, ${req.body.room_id}::int2, ${req.body.duration}::int2, to_timestamp('${req.body.datetime}','YYYY-MM-DD HH24:MI')::timestamp);`
     , function(err, results){
         if(err) res.status(500).json({
@@ -249,9 +232,28 @@ app.post("/signup_new_customer", express.json(), (req, res) => {
 
     var pass = createHash('sha256').update(req.body.password).digest('base64');
 
-    connection.query(`select karaoke.UserRegister('${req.body.phone}'::text, '${req.body.email}'::text, '${pass}'::text);`
-    , function(err, results){
+    if (req.body.fact_id != null )
+        var query = `select * from karaoke.customerRegist_cus(
+            '${req.body.fname}'::text, 
+            '${req.body.lname}'::text, 
+            '${req.body.phone}'::text, 
+            '${req.body.fact_id}'::int2,
+            '${req.body.email}'::text, 
+            '${pass}'::text
+        );`
+    else 
+        var query = `select * from karaoke.customerRegist_cus(
+            '${req.body.fname}'::text, 
+            '${req.body.lname}'::text, 
+            '${req.body.phone}'::text, 
+            ${req.body.fact_id}::int2,
+            '${req.body.email}'::text, 
+            '${pass}'::text
+        );`
+
+    connection.query(query, function(err, results){
         if(err) res.status(500).json({
+            message: 'fail can not register',
             error:err
         }) 
         else 
@@ -261,3 +263,31 @@ app.post("/signup_new_customer", express.json(), (req, res) => {
         });
 })
 });
+
+
+
+
+
+app.post('/login', express.json(), async function (req, res, next) {
+    console.log(`login ${++req_count}`);  
+    var pass = createHash('sha256').update(req.body.password).digest('base64');
+
+    var query = `select * from karaoke.customerLogin('${req.body.phone}','${pass}');`;
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error', error: err});
+        else if (results.rows[0].login != null)    
+            res.status(200).json({  
+                message: 'success',
+                results: results.rows
+            });
+        else
+            res.status(200).json({  
+                message: 'login_fail',
+                results: results.rows
+            });
+    });
+
+});
+
