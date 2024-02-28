@@ -3,17 +3,18 @@ const { get } = require('http');
 const path = require('path');
 const {Client} = require('pg');
 const { createHash } = require('crypto');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 // Connect to Postgres Database
 {
     var connection = new Client({
-        // host: '127.0.0.1',//0.tcp.ap.ngrok.io:13717
-        // port: 5555,
-        host: 'aws-0-ap-southeast-1.pooler.supabase.com',
-        port: 5432,
-        user: 'postgres.olictqjkgtdtndbkephu',
-        password: 'DBProjLocalDBServerPass_555',
-        database: 'postgres'
+        host: process.env.HOST,
+        user: process.env.USER,
+        password: process.env.PASSWORD,
+        database: process.env.DATABASE,
+        port: process.env.data_base_port
     });
 
     
@@ -31,9 +32,13 @@ const { createHash } = require('crypto');
 // Create a new express application instance
 {
     var app = express();
+    app.use(cookieParser());
     app.use(express.static('public'));
     app.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', '*');
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+        res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+        res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
         next();
     });
 
@@ -63,7 +68,10 @@ const { createHash } = require('crypto');
 //     });
 // }
 
+let req_count = 0;
+
 app.get('/' , async function (req, res, next) {
+    console.log("/ : " + req_count++);
     res.status(200).json({
         message: 'success',
         results: 'API work fine!'
@@ -71,6 +79,7 @@ app.get('/' , async function (req, res, next) {
 });
 
 app.get('/getFaculty', async function (req, res, next) {
+    console.log("/getFaculty : " + req_count++);
     var query = "select * from karaoke.getallfaculty();";
     connection.query(query, function (err, results) {
         if (err) 
@@ -85,6 +94,7 @@ app.get('/getFaculty', async function (req, res, next) {
 });
 
 app.post('/AdminLogin',express.json(), async function (req, res, next) {
+    console.log("/AdminLogin : " + req_count++);
     var pass = createHash('sha256').update(req.body.password).digest('base64');
 
     var query = `select karaoke.AdminLogin('${req.body.username}','${pass}');`;
@@ -92,7 +102,7 @@ app.post('/AdminLogin',express.json(), async function (req, res, next) {
         if (err) 
             res.status(500).json(
                 {message: 'error', error: err});
-        else if (results.rows[0].login != null)    
+        else if (results.rows[0].adminlogin != null)    
             res.status(200).json({  
                 message: 'success',
                 results: results.rows
@@ -106,6 +116,7 @@ app.post('/AdminLogin',express.json(), async function (req, res, next) {
 });
 
 app.get('/Home', async function (req, res, next) {
+    console.log("/Home : " + req_count++);
     var datetime = req.query.date;
 
     if (datetime == undefined || datetime.length == 0) datetime = 'now';
@@ -125,6 +136,66 @@ app.get('/Home', async function (req, res, next) {
 
 app.post('/addRoom',express.json(), async function (req, res, next) {
     var query = `select karaoke.add_room('${req.body.room_name}');`;
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error','error': err});
+        else    
+            res.status(200).json({
+                message: 'success',
+                results: results.rows
+            });
+    });
+});
+
+app.post('/addPromotion',express.json(), async function (req, res, next) {
+    console.log('addPromotion '+req_count++);
+    var query = `select karaoke.add_promotion('${req.body.promotion_name}', ${req.body.type_id}::int2,${req.body.condition}::int2,${req.body.discount}::int2,'${req.body.start}','${req.body.end}');`;
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error','error': err});
+        else    
+            res.status(200).json({
+                message: 'success',
+                results: results.rows
+            });
+    });
+});
+
+app.get('/getAvailablePromo', async function (req, res, next) {
+    console.log('getAvailablePromo '+req_count++);
+    var query = `select * from karaoke.getAvaPromo();`;
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error','error': err});
+        else    
+            res.status(200).json({
+                message: 'success',
+                results: results.rows
+            });
+    });
+});
+
+app.get('/reservationDetail', async function (req, res, next) {
+    console.log('reservationDetail '+req_count++);
+    var query = `select * from karaoke.res_detail(${req.query.id});`;
+    connection.query(query, function (err, results) {
+        if (err) 
+            res.status(500).json(
+                {message: 'error','error': err});
+        else    
+            res.status(200).json({
+                message: 'success',
+                results: results.rows
+            });
+    });
+});
+
+app.delete('/deletePromotion', async function (req, res, next) {
+    console.log('deletePromotion '+req_count++);
+    var query = `select karaoke.delete_promotion_v2(${req.query.id}::int2);`;
     connection.query(query, function (err, results) {
         if (err) 
             res.status(500).json(
