@@ -1,11 +1,8 @@
 const jwt = require('jsonwebtoken');
-const pool = require('./db');
+const pool = require('../db');
 const { createHash } = require('crypto');
 
 var connection = pool;
-connection.connect(async function(err) {
-    if (err) console.log(err,"\n\n database Failed to connect!");
-});
 
 module.exports = async (req,res,next) => {
     const {username, password} = req.body;
@@ -19,10 +16,10 @@ module.exports = async (req,res,next) => {
         else if (results.rows[0].adminlogin != null){  
 
             const token = jwt.sign({username, password}, process.env.JWT_SECRET, {expiresIn: '7d'});
-
-            res .cookie('token', token, {httpOnly: true})
+            console.log(token);
+            res .cookie('token', token, {sameSite: 'none', httpOnly:true})
                 .status(200)
-                .json({  
+                .json({ 
                 message: 'success',
                 results: results.rows
                 });}

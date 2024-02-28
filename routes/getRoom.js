@@ -1,11 +1,8 @@
 const pool = require('../db');
-
 var connection = pool;
 
-module.exports = async (req, res, next) => {
-    var datetime = req.query.date;
-    if (datetime == undefined || datetime.length == 0) datetime = 'now';
-    var query = `select * from karaoke.reserv_filter_dashboard('${datetime}');`;
+module.exports =  async function (req, res, next) {
+    var query = `select * from karaoke.getRoom();`;
     connection.query(query, function (err, results) {
         if (err) 
             res.status(500).json(

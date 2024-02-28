@@ -1,8 +1,6 @@
-const pool = require('./db');
+const pool = require('../db');
+const mailSender = require('../mailSender');
 var connection = pool;
-connection.connect(async function(err) {
-    if (err) console.log(err,"\n\n database Failed to connect!");
-});
 
 module.exports =  async function (req, res, next) {
     var query = `select karaoke.delete_promotion(${req.query.id}::int2);`;
@@ -10,10 +8,12 @@ module.exports =  async function (req, res, next) {
         if (err) 
             res.status(500).json(
                 {message: 'error','error': err});
-        else    
+        else    {
+            // mailSender.sendMail(result, 'You have deleted a promotion');
             res.status(200).json({
                 message: 'success',
                 results: results.rows
             });
+        }
     });
 }
