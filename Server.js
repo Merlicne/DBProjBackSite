@@ -1,9 +1,6 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 var cors = require('cors');
-
-const pool = require('./db'); 
-const verifyToken = require('./middleware/JWT_auth');
 const loginRoute = require('./routes/login');
 const getFaculty = require('./routes/getFaculty');
 const home = require('./routes/home');
