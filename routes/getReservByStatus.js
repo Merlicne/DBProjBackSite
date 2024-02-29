@@ -1,12 +1,10 @@
 const pool = require('../db');
-const { createHash } = require('crypto');
 var connection = pool;
 
-module.exports = async function (req, res, next) {
-    // console.log(req.body);
-    var { email, password } = req.body;
-    var hash = createHash('sha256').update(password).digest('base64');
-    var query = `select * from karaoke.resetpassword_admin('${email}','${hash}');`;
+
+module.exports = async (req,res,next) => {
+    var id = res.locals.status_id;
+    var query = `select * from karaoke.getReservationByStatus(${id}) order by res_id desc;`;
     connection.query(query, function (err, results) {
         if (err) 
             res.status(500).json(

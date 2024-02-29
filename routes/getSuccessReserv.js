@@ -3,6 +3,6 @@ var connection = pool;
 
 
 module.exports = async (req,res,next) => {
-    res.locals.status_id = 2;
+    res.locals.status_id = 3;
     next();
 }

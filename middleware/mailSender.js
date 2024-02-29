@@ -18,7 +18,7 @@ module.exports = async (email,otp) =>{
       to: email,
       subject: "Verification OTP for Karaoke Nongtao",
       html: `<h1>Verification OTP for Karaoke Nongtao</h1>
-        <p>Your OTP is <mark>${otp}</mark></p>
+        <p>Your OTP is <mark> ${otp} </mark></p>
         <p>Thank you for using our service</p>
         <p>Best Regards</p>
         <p>Karaoke Nongtao</p>`
