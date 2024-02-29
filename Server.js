@@ -21,6 +21,8 @@ const createAdmin = require('./routes/Create_admin');
 const deleteAdmin = require('./routes/delete_admin');
 const {OTP_holding, OTP_check} = require('./middleware/OTP');
 const { API_KEY, KEY_GENERATOR } = require('./middleware/API_KEY');
+const getAdmin = require('./routes/getAdmin');
+const getCancelReservation = require('./routes/getCanceledReserv');
 
 require('dotenv').config();
 
@@ -60,7 +62,6 @@ var count_req = (req,res,next) => {
 }
 
 
-app.post('/AdminLogin',express.json(), loginRoute, KEY_GENERATOR);
 
 // app.use(verifyToken);
 
@@ -72,24 +73,29 @@ app.get('/' , async function (req, res, next) {
     });
 });
 
+app.post('/AdminLogin',express.json(), loginRoute, KEY_GENERATOR);
+
+app.post('/forgetPassword',express.json(), forgetPassword, OTP_holding);
+app.post('/resetPassword',express.json(), OTP_check, resetPassword);
+
+
+
 app.get('/getFaculty',API_KEY, getFaculty);
 app.get('/Home' ,API_KEY, home);
 app.get('/getAvailablePromo' ,API_KEY,getAvailablePromo);
 app.get('/reservationDetail',API_KEY , reservationDetail);
 app.get('/getRoom',API_KEY, getRoom);
+app.get('/getAdmin',API_KEY, getAdmin);
+app.get('/getCancelReservation',API_KEY, getCancelReservation);
 
-app.put('/deletePromotion' ,API_KEY, deletePromotion);
+app.put('/deletePromotion',API_KEY , deletePromotion);
 app.put('/deleteRoom',API_KEY , deleteRoom);
-
-app.post('/forgetPassword',express.json(), forgetPassword,OTP_holding);
-app.post('/resetPassword',express.json(), OTP_check, resetPassword);
 
 app.use(express.json());
 app.use(API_KEY);
 
-app.post('/addRoom',express.json(), addRoom);
-app.post('/addPromotion' ,express.json(), addPromotion);
-app.post('/add_room',express.json(), add_room);
-app.post('/Create_admin',express.json(), createAdmin);
-
-app.delete('/delete_admin',express.json(), deleteAdmin);
+app.post('/addRoom', addRoom);
+app.post('/addPromotion' , addPromotion);
+app.post('/add_room', add_room);
+app.post('/Create_admin' , createAdmin);
+app.delete('/delete_admin', deleteAdmin);

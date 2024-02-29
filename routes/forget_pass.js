@@ -1,5 +1,5 @@
 const pool = require('../db');
-const mailSender = require('../mailSender');
+const mailSender = require('../middleware/mailSender');
 var connection = pool;
 
 const randomOTP = () => {
