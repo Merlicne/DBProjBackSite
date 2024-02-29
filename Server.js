@@ -17,6 +17,10 @@ const add_room = require('./routes/addRoom');
 const deleteRoom = require('./routes/deleteRoom');
 const forgetPassword = require('./routes/forget_pass');
 const resetPassword = require('./routes/resetPassword');
+const createAdmin = require('./routes/Create_admin');
+const deleteAdmin = require('./routes/delete_admin');
+const {OTP_holding, OTP_check} = require('./middleware/OTP');
+const { API_KEY, KEY_GENERATOR } = require('./middleware/API_KEY');
 
 require('dotenv').config();
 
@@ -45,10 +49,9 @@ var count_req = (req,res,next) => {
         res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,DELETE");
         res.setHeader("Access-Control-Allow-Headers", "Authorization, Accept,X-Requested-With, Content-Length, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
         next();
-        app.use(cookieParser());
-        app.use(express.static('public'));
     });
-    
+    app.use(cookieParser());
+    app.use(express.static('public'));
     
     const PORT = process.env.PORT || 3000;
     app.listen(PORT,async () => {
@@ -56,41 +59,10 @@ var count_req = (req,res,next) => {
     });
 }
 
-var OTP_collection = [];
 
-var OTP_holding = (req,res,next) => {
-    var OTP_data = {
-        email: res.locals.email,
-        OTP: res.locals.otp,
-        time: new Date().getTime()
-    }
-    OTP_collection.push(OTP_data);
-    console.log(OTP_collection);
-}
+app.post('/AdminLogin',express.json(), loginRoute, KEY_GENERATOR);
 
-var OTP_check = (req,res,next) => {
-    var OTP = req.body.otp;
-    var email = req.body.email;
-
-    var index = OTP_collection.findIndex((element) => {
-        return element.email == email;
-    });
-
-    if(OTP == null) {
-        res.status(400).json({message: 'error', 'error': 'OTP or email is missing'});
-    }
-    else if(OTP_collection[index].OTP != OTP) {
-        res.status(400).json({message: 'error', 'error': 'OTP is incorrect'});
-    }
-    else if(new Date().getTime() - OTP_collection[index].time > 1000 * 60 * 1) {
-        res.status(400).json({message: 'error', 'error': 'OTP is expired'});
-    }
-    else {
-        OTP_collection.splice(index,1);
-        next();
-    }
-}
-
+// app.use(verifyToken);
 
 app.get('/' , async function (req, res, next) {
     console.log("/ : " + req_count++);
@@ -100,18 +72,24 @@ app.get('/' , async function (req, res, next) {
     });
 });
 
-app.get('/getFaculty', getFaculty);
-app.get('/Home', home);
-app.get('/getAvailablePromo' ,getAvailablePromo);
-app.get('/reservationDetail' , reservationDetail);
-app.get('/getRoom', getRoom);
+app.get('/getFaculty',API_KEY, getFaculty);
+app.get('/Home' ,API_KEY, home);
+app.get('/getAvailablePromo' ,API_KEY,getAvailablePromo);
+app.get('/reservationDetail',API_KEY , reservationDetail);
+app.get('/getRoom',API_KEY, getRoom);
 
-app.put('/deletePromotion' , deletePromotion);
-app.put('/deleteRoom' , deleteRoom);
+app.put('/deletePromotion' ,API_KEY, deletePromotion);
+app.put('/deleteRoom',API_KEY , deleteRoom);
 
-app.post('/addRoom',express.json(), addRoom);
-app.post('/AdminLogin',express.json(), loginRoute);
-app.post('/addPromotion' ,express.json(), addPromotion);
-app.post('/add_room',express.json(), add_room);
 app.post('/forgetPassword',express.json(), forgetPassword,OTP_holding);
 app.post('/resetPassword',express.json(), OTP_check, resetPassword);
+
+app.use(express.json());
+app.use(API_KEY);
+
+app.post('/addRoom',express.json(), addRoom);
+app.post('/addPromotion' ,express.json(), addPromotion);
+app.post('/add_room',express.json(), add_room);
+app.post('/Create_admin',express.json(), createAdmin);
+
+app.delete('/delete_admin',express.json(), deleteAdmin);

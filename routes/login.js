@@ -15,13 +15,13 @@ module.exports = async (req,res,next) => {
                 {message: 'error', error: err});
         else if (results.rows[0].adminlogin != null){  
 
-            const token = jwt.sign({username, password}, process.env.JWT_SECRET, {expiresIn: '7d'});
-            console.log(token);
-            res .cookie('token', token, {sameSite: 'none', httpOnly:true})
-                .status(200)
+            next();
+
+            res .status(200)
                 .json({ 
                 message: 'success',
-                results: results.rows
+                results: results.rows,
+                key: res.locals.key
                 });}
         else
             res.status(200).json({  
@@ -32,27 +32,4 @@ module.exports = async (req,res,next) => {
 
 }
 
-/*
-app.post('/AdminLogin',express.json(), async function (req, res, next) {
-    console.log("/AdminLogin : " + req_count++);
-    var pass = createHash('sha256').update(req.body.password).digest('base64');
-
-    var query = `select karaoke.AdminLogin('${req.body.username}','${pass}');`;
-    connection.query(query, function (err, results) {
-        if (err) 
-            res.status(500).json(
-                {message: 'error', error: err});
-        else if (results.rows[0].adminlogin != null)    
-            res.status(200).json({  
-                message: 'success',
-                results: results.rows
-            });
-        else
-            res.status(200).json({  
-                message: 'login_fail',
-                results: results.rows
-            });
-    });
-});
-*/
 
