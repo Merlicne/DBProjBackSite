@@ -25,6 +25,9 @@ const getReservByStatus = require('./routes/getReservByStatus');
 const editAdmin = require('./routes/editAdmin');
 const getDailyRevenue = require('./routes/getDailyRevenue');
 const getMonthlyRevenue = require('./routes/getMonthlyRevenue');
+const showProfile = require('./routes/showprofile');
+const cancelReserv = require('./routes/cancelReserv');
+const DoneReserv = require('./routes/ReservDone');
 
 require('dotenv').config();
 
@@ -93,6 +96,8 @@ app.get('/getMonthlyRevenue',API_KEY, getMonthlyRevenue);
 
 app.put('/deletePromotion',API_KEY , deletePromotion);
 app.put('/deleteRoom',API_KEY , deleteRoom);
+app.put('/cancelReserv',API_KEY , cancelReserv);
+app.put('/ReservDone',API_KEY , DoneReserv)
 
 app.use(express.json());
 app.use(API_KEY);
@@ -100,6 +105,7 @@ app.use(API_KEY);
 
 app.put('/editAdmin', editAdmin);
 app.post('/addRoom', addRoom);
+app.post('/showProfile', showProfile);
 app.post('/ResetPassFromProfile', resetPassword);
 app.post('/addPromotion' , addPromotion);
 app.post('/add_room', add_room);
