@@ -83,8 +83,9 @@ app.post('/AdminLogin',express.json(), loginRoute, KEY_GENERATOR);
 app.post('/forgetPassword',express.json(), forgetPassword, OTP_holding);
 app.post('/resetPassword',express.json(), OTP_check, resetPassword);
 
+
 app.get('/getFaculty',API_KEY, getFaculty);
-app.get('/Home' ,API_KEY, home);
+app.get('/Home',API_KEY, home);
 app.get('/getAvailablePromo' ,API_KEY,getAvailablePromo);
 app.get('/reservationDetail',API_KEY , reservationDetail);
 app.get('/getRoom',API_KEY, getRoom);
