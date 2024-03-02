@@ -31,7 +31,7 @@ var OTP_check = (req,res,next) => {
     }
     else {
         OTP_collection.splice(index,1);
-        next();
+        res.status(200).json({message: 'success'});
     }
 }
 
