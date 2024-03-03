@@ -3,9 +3,9 @@ const { createHash } = require('crypto');
 var connection = pool;
 
 module.exports = async function (req, res, next) {
-    // console.log(req.body);
-    var { email, password } = req.body;
-    var hash = createHash('sha256').update(password).digest('base64');
+    console.log(req.body);
+    var { email, newPassword } = req.body;
+    var hash = createHash('sha256').update(newPassword).digest('base64');
     var query = `select * from karaoke.resetpassword_admin('${email}','${hash}');`;
     connection.query(query, function (err, results) {
         if (err) 

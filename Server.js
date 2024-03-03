@@ -29,10 +29,10 @@ const showProfile = require('./routes/showprofile');
 const cancelReserv = require('./routes/cancelReserv');
 const DoneReserv = require('./routes/ReservDone');
 const getMonthCount = require('./routes/getCountResPerMonth');
-
+const pool = require('./db');
 require('dotenv').config();
 
-
+var connection = pool;
 // var connection = pool.connect(async function(err) {
 //     if (err) console.log(err,"\n\n database Failed to connect!");
 //     else console.log('Database connected!');
@@ -70,6 +70,20 @@ var count_req = (req,res,next) => {
 
 
 // app.use(verifyToken);
+
+app.post('/test',express.json(), (req, res) => {
+    connection.query(`select * from karaoke.check_timeslot('${req.body.date}','${req.body.time}',${req.body.duration}::int2,'${req.body.roomname}');`, function (err, results) {
+        // console.log(results.rows);
+        if (err) 
+            res.status(500).json(
+                {message: 'error','error': err});
+        else    
+            res.status(200).json({
+                message: 'success',
+                results: results.rows
+            });
+    });
+});
 
 app.get('/' , async function (req, res, next) {
     console.log("/ : " + req_count++);

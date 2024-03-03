@@ -14,7 +14,7 @@ const API_KEY = (req,res,next) => {
     }
     jwt.verify(key, process.env.JWT_SECRET, (err, user) => {
         if (err) {
-            res.status(401).json({message: 'Invalid API Key'});
+            res.status(403).json({message: 'Invalid API Key'});
         }else{
             if(user){next();}else{res.status(401).json({message: 'Invalid API Key'});}
         }
