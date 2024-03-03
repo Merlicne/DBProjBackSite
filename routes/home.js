@@ -3,6 +3,7 @@ const pool = require('../db');
 var connection = pool;
 
 module.exports = async (req, res, next) => {
+    // console.log(req.headers);
     var datetime = req.query.date;
     if (datetime == undefined || datetime.length == 0) datetime = 'now';
     var query = `select * from karaoke.reserv_filter_dashboard('${datetime}');`;

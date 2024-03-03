@@ -8,7 +8,8 @@ module.exports = async (req,res,next) => {
     const {username, password} = req.body;
     var pass = createHash('sha256').update(password).digest('base64');
 
-    
+    // console.log(req.headers);
+
     var query = `select karaoke.AdminLogin('${username}','${pass}');`;
     connection.query(query, function (err, results) {
         if (err) 

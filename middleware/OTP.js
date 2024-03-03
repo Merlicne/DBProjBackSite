@@ -15,18 +15,17 @@ var OTP_holding = (req,res,next) => {
 var OTP_check = (req,res,next) => {
     var OTP = req.body.otp;
     var email = req.body.email;
+    if(OTP == null || email == null) {
+        res.status(400).json({message: 'error', 'error': 'OTP or email is missing'});
+    }
 
     var index = OTP_collection.findIndex((element) => {
         return element.email == email;
     });
-
-    if(OTP == null) {
-        res.status(400).json({message: 'error', 'error': 'OTP or email is missing'});
-    }
-    else if(OTP_collection[index].OTP != OTP) {
+    if(OTP_collection[index].OTP != OTP) {
         res.status(400).json({message: 'error', 'error': 'OTP is incorrect'});
     }
-    else if(new Date().getTime() - OTP_collection[index].time > 1000 * 60 * 1) {
+    else if(new Date().getTime() - OTP_collection[index].time > 1000 * 60 * 5) {
         res.status(400).json({message: 'error', 'error': 'OTP is expired'});
     }
     else {
