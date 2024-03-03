@@ -28,6 +28,7 @@ const getMonthlyRevenue = require('./routes/getMonthlyRevenue');
 const showProfile = require('./routes/showprofile');
 const cancelReserv = require('./routes/cancelReserv');
 const DoneReserv = require('./routes/ReservDone');
+const getMonthCount = require('./routes/getCountResPerMonth');
 
 require('dotenv').config();
 
@@ -93,7 +94,7 @@ app.get('/getRoom',API_KEY, getRoom);
 app.get('/getAdmin',API_KEY, getAdmin);
 app.get('/getCancelReservation',API_KEY, getCancelReservation, getReservByStatus);
 app.get('/getSuccessReservation',API_KEY, getSuccesReservation,getReservByStatus);
-app.get('/getDailyRevenue',API_KEY, getDailyRevenue);
+app.get('/getMonthCount',API_KEY, getMonthCount);
 app.get('/getMonthlyRevenue',API_KEY, getMonthlyRevenue);
 
 app.put('/deletePromotion',API_KEY , deletePromotion);

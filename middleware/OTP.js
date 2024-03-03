@@ -22,7 +22,20 @@ var OTP_check = (req,res,next) => {
     var index = OTP_collection.findIndex((element) => {
         return element.email == email;
     });
-    if(OTP_collection[index].OTP != OTP) {
+
+    if(index == -1) {
+        res.status(400).json({message: 'error', 'error': 'OTP is not found'});
+    }
+    
+    var otp;
+    try {
+        otp = OTP_collection[index].OTP;
+    }
+    catch(err) {
+        res.status(400).json({message: 'error', 'error': 'OTP was used'});
+    }
+
+    if(otp != OTP) {
         res.status(400).json({message: 'error', 'error': 'OTP is incorrect'});
     }
     else if(new Date().getTime() - OTP_collection[index].time > 1000 * 60 * 5) {

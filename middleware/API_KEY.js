@@ -5,19 +5,14 @@ var connection = pool;
 
 const API_KEY = (req,res,next) => {
     try {
-        // console.log(req.headers);
         var key = req.headers['authorization'].split(' ')[1];
-        // console.log("****headers");
         if(!key || key == undefined) {  var key = req.body.key;
-            // console.log("****body");
         }
     }
     catch (e) {
         var key = req.query.key;
-        // console.log("****query");
     }
     jwt.verify(key, process.env.JWT_SECRET, (err, user) => {
-        // console.log(user);
         if (err) {
             res.status(401).json({message: 'Invalid API Key'});
         }else{
